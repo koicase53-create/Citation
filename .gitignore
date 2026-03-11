@@ -201,6 +201,17 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# Project runtime and source-data artifacts
+.DS_Store
+users.json
+search_log.log
+search_log.xlsx
+citations.db
+citations_optimized.db
+database.csv
+cnki_enriched.csv
+shard_manifest.txt
+
 # Marimo
 marimo/_static/
 marimo/_lsp/

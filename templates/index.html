@@ -1,0 +1,441 @@
+<!-- START OF FILE index.html (PREMIUM REDESIGN + NEW CHARTS) -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析工具 - 引力域 (Citation Field)</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_version) }}">
+</head>
+<body>
+    <div class="page-container tool-page">
+        <div class="tool-card">
+
+            <!-- ── Header ── -->
+            <header class="tool-header">
+                <a href="{{ url_for('welcome') }}" class="header-brand-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    <img src="{{ url_for('static', filename='favicon.png') }}" alt="Logo" class="header-logo-small">
+                    <span>引力域</span>
+                </a>
+                <div class="header-actions">
+                    <button id="historyToggleBtn" class="history-toggle-btn" title="检索历史">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>历史记录</span>
+                        <span id="historyBadge" class="history-badge" style="display:none;"></span>
+                    </button>
+                    <a href="{{ url_for('logout') }}" class="logout-link">登出 · {{ session.user_email }}</a>
+                </div>
+            </header>
+
+            <!-- ── History Slide Panel ── -->
+            <div id="historyPanel" class="history-panel">
+                <div class="history-panel-header">
+                    <div class="history-panel-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        检索历史
+                    </div>
+                    <div class="history-panel-controls">
+                        <button id="historyClearBtn" class="history-clear-btn" title="清空历史">清空</button>
+                        <button id="historyCloseBtn" class="history-close-btn" title="关闭">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="historyList" class="history-list">
+                    <div class="history-empty">暂无检索记录</div>
+                </div>
+            </div>
+            <div id="historyOverlay" class="history-overlay"></div>
+
+            <!-- ── Main Container ── -->
+            <div class="tool-container">
+
+                <!-- Tabs -->
+                <nav class="tabs">
+                    <button class="tab-button active" data-target="author-info-pane">
+                        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span class="tab-label">查作者信息</span>
+                    </button>
+                    <button class="tab-button" data-target="author-citing-pane">
+                        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        <span class="tab-label">查作者引用</span>
+                    </button>
+                    <button class="tab-button" data-target="author-network-pane">
+                        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        <span class="tab-label">查作者关系</span>
+                    </button>
+                    <button class="tab-button" data-target="journal-pane">
+                        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        <span class="tab-label">查期刊互引</span>
+                    </button>
+                    <button class="tab-button" data-target="cited-by-pane">
+                        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        <span class="tab-label">查文章被引</span>
+                    </button>
+                </nav>
+
+                <!-- ============================================================
+                     功能 1: 查作者信息
+                ============================================================ -->
+                <div class="tab-pane active" id="author-info-pane">
+
+                    <!-- Stage 1: Search -->
+                    <div id="author-stage-1">
+                        <div class="form-card">
+                            <h2>查找作者或机构</h2>
+                            <p class="form-description">通过作者姓名或机构名进行模糊查找，获取学术产出、被引统计等信息。</p>
+                            <div class="form-group">
+                                <label for="author-search-query">作者姓名或机构名</label>
+                                <input type="text" id="author-search-query" placeholder="例如: 文秋芳 或 北京外国语大学">
+                            </div>
+                            <button class="btn-primary" id="find-author-btn">按名称查找</button>
+                        </div>
+                    </div>
+
+                    <!-- Stage 2: Candidate list -->
+                    <div id="author-stage-2" style="display: none;">
+                        <div class="form-card">
+                            <h2>选择作者</h2>
+                            <p class="form-description">请从以下结果中选择正确的作者。</p>
+                            <div id="author-candidates-container" class="content-container"></div>
+                            <button class="btn-secondary" id="back-to-author-search-from-candidates">返回重新搜索</button>
+                        </div>
+                    </div>
+
+                    <!-- Stage 3: Author detail -->
+                    <div id="author-stage-3" style="display: none;">
+                        <div class="form-card">
+                            <div id="selected-author-info-card"></div>
+
+                            <!-- Charts: Trend + Bubble (dual grid) -->
+                            <div class="charts-dual-grid" id="author-charts-dual">
+
+                                <!-- Chart A: Yearly trend -->
+                                <div class="chart-section" id="author-trend-section">
+                                    <div class="chart-section-header">
+                                        <div class="chart-section-title">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                            <h3>年度发文与被引趋势</h3>
+                                        </div>
+                                        <div class="chart-section-actions">
+                                            <button class="btn-chart-action" id="download-chart-btn">下载</button>
+                                        </div>
+                                    </div>
+                                    <div class="chart-section-body">
+                                        <div id="author-chart-container" class="chart-container" style="min-height: 280px;">
+                                            <canvas id="author-yearly-chart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Chart B: Impact scatter (NEW) -->
+                                <div class="chart-section" id="author-bubble-section">
+                                    <div class="chart-section-header">
+                                        <div class="chart-section-title">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="14.83" y1="9.17" x2="18.36" y2="5.64"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
+                                            <h3>论文引用分布散点图</h3>
+                                        </div>
+                                    </div>
+                                    <div class="chart-section-body">
+                                        <div id="author-bubble-chart" class="chart-container" style="min-height: 280px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Citation stats -->
+                            <div id="author-citation-stats-container" style="margin-top: 1.5rem;"></div>
+
+                            <!-- Works list -->
+                            <div class="list-controls">
+                                <div class="list-header">
+                                    <h3>文章列表</h3>
+                                    <button class="btn-secondary-small btn-export" data-target="author-works-container" data-filename-prefix="author_works">导出 Excel</button>
+                                </div>
+                                <div class="filter-sort-bar">
+                                    <div class="filter-group">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                        <input type="text" id="work-filter-input" placeholder="筛选标题或期刊…">
+                                    </div>
+                                    <div class="sort-group">
+                                        <label for="work-sort-select">排序</label>
+                                        <select id="work-sort-select">
+                                            <option value="cited_desc">被引量 (高→低)</option>
+                                            <option value="cited_asc">被引量 (低→高)</option>
+                                            <option value="year_desc">年份 (新→旧)</option>
+                                            <option value="year_asc">年份 (旧→新)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="author-works-container" class="content-container" style="margin-top: 0.75rem;"></div>
+                        </div>
+                        <button class="btn-secondary" id="back-to-author-search">返回作者列表</button>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     功能 2: 查作者引用
+                ============================================================ -->
+                <div class="tab-pane" id="author-citing-pane">
+                    <div class="form-card">
+                        <h2>检索作者引用情况</h2>
+                        <p class="form-description">检索某位或多位作者在特定时间内，其发表的文章引用了指定目标期刊的情况。</p>
+                        <div class="form-group">
+                            <label for="citing-author-name">发文作者 (多人用英文逗号 , 分隔) *</label>
+                            <input type="text" id="citing-author-name" required placeholder="例如: 何宁, 文秋芳">
+                        </div>
+                        <div class="journal-picker-container">
+                            <div class="form-group">
+                                <label for="author-citing-target-journal">引用的目标期刊 (多个请用英文逗号分隔) *</label>
+                                <div class="quick-fill-container" data-target-input="author-citing-target-journal">
+                                    <button class="btn-quick-fill" data-type="all">所有期刊</button>
+                                    <button class="btn-quick-fill" data-type="C刊">C刊</button>
+                                    <button class="btn-quick-fill" data-type="C扩">C扩</button>
+                                    <button class="btn-quick-fill" data-type="集刊">集刊</button>
+                                    <button class="btn-quick-fill" data-type="clear">清空</button>
+                                </div>
+                                <input type="text" id="author-citing-target-journal" class="journal-input" placeholder="点击上方按钮快速填充，或手动输入">
+                            </div>
+                            <div class="form-group quick-add-container" id="quick-add-container-author-target-journal"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>文章发表年份范围 *</label>
+                            <div class="input-group">
+                                <input type="number" id="author-citing-start-year" value="2020">
+                                <span>到</span>
+                                <input type="number" id="author-citing-end-year" value="{{ current_year }}">
+                            </div>
+                        </div>
+                        <button class="btn-primary" id="search-author-citing-btn">检索引用</button>
+                    </div>
+
+                    <div id="author-citing-results-wrapper" style="display: none; margin-top: 2rem;">
+
+                        <!-- Sankey (existing) -->
+                        <div class="chart-section">
+                            <div class="chart-section-header">
+                                <div class="chart-section-title">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                                    <h3>引用关系桑基图</h3>
+                                </div>
+                            </div>
+                            <div class="chart-section-body">
+                                <div id="author-citing-chart" class="chart-container"></div>
+                            </div>
+                        </div>
+
+                        <!-- Journal distribution chart (replaces year stacked bar) -->
+                        <div class="chart-section" style="margin-top: 1rem;">
+                            <div class="chart-section-header">
+                                <div class="chart-section-title">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 17h7M17 14v7"/></svg>
+                                    <h3>作者发文期刊分布</h3>
+                                </div>
+                            </div>
+                            <div class="chart-section-body">
+                                <div id="author-citing-bar-chart" class="chart-container" style="min-height: 200px;"></div>
+                            </div>
+                        </div>
+
+                        <div id="author-citing-results-container" style="margin-top: 1.5rem;"></div>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     功能 3: 查作者关系（神经网络图）
+                ============================================================ -->
+                <div class="tab-pane" id="author-network-pane">
+                    <div class="form-card">
+                        <h2>查作者学术关系网络</h2>
+                        <p class="form-description">输入作者姓名，探索其合著关系、引用关系与被引关系，生成可交互的学术网络图谱。</p>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:2;">
+                                <label for="network-author-name">作者姓名 *</label>
+                                <input type="text" id="network-author-name" placeholder="例如：文秋芳">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label>年份范围</label>
+                                <div class="year-range-inputs">
+                                    <input type="number" id="network-start-year" value="2000">
+                                    <span>到</span>
+                                    <input type="number" id="network-end-year" value="{{ current_year }}">
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-primary" id="search-author-network-btn">生成关系图谱</button>
+                    </div>
+
+                    <div id="author-network-results-wrapper" style="display: none; margin-top: 2rem;">
+                        <!-- Legend + stats strip -->
+                        <div id="author-network-stats" class="network-stats-strip"></div>
+
+                        <!-- Force graph -->
+                        <div class="chart-section" style="margin-top: 1rem;">
+                            <div class="chart-section-header">
+                                <div class="chart-section-title">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                    <h3>学术关系网络图谱</h3>
+                                </div>
+                                <div class="chart-section-actions">
+                                    <span class="chart-hint">可拖拽重排 · 滚轮缩放 · 关键作者姓名固定显示</span>
+                                </div>
+                            </div>
+                            <div class="chart-section-body" style="padding:0;">
+                                <div id="author-network-chart" class="chart-container" style="height: 560px; border-radius: 0 0 var(--r-md) var(--r-md);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     功能 4: 查期刊互引
+                ============================================================ -->
+                <div class="tab-pane" id="journal-pane">
+                    <div class="form-card">
+                        <h2>检索期刊互引</h2>
+                        <p class="form-description">检索一个或多个源期刊在特定时间内引用了目标期刊的情况。</p>
+                        <div class="journal-picker-container">
+                            <div class="form-group">
+                                <label for="source-journals">源期刊 (多个用英文逗号分隔) *</label>
+                                <div class="quick-fill-container" data-target-input="source-journals">
+                                    <button class="btn-quick-fill" data-type="all">所有期刊</button>
+                                    <button class="btn-quick-fill" data-type="C刊">C刊</button>
+                                    <button class="btn-quick-fill" data-type="C扩">C扩</button>
+                                    <button class="btn-quick-fill" data-type="集刊">集刊</button>
+                                    <button class="btn-quick-fill" data-type="clear">清空</button>
+                                </div>
+                                <input type="text" id="source-journals" class="journal-input" required placeholder="点击上方按钮快速填充，或手动输入">
+                            </div>
+                            <div class="form-group quick-add-container" id="quick-add-container-source-journals"></div>
+                        </div>
+                        <div class="journal-picker-container">
+                            <div class="form-group">
+                                <label for="journal-target-journal">引用的目标期刊 (多个用英文逗号分隔) *</label>
+                                <div class="quick-fill-container" data-target-input="journal-target-journal">
+                                    <button class="btn-quick-fill" data-type="all">所有期刊</button>
+                                    <button class="btn-quick-fill" data-type="C刊">C刊</button>
+                                    <button class="btn-quick-fill" data-type="C扩">C扩</button>
+                                    <button class="btn-quick-fill" data-type="集刊">集刊</button>
+                                    <button class="btn-quick-fill" data-type="clear">清空</button>
+                                </div>
+                                <input type="text" id="journal-target-journal" class="journal-input" required placeholder="点击上方按钮快速填充，或手动输入">
+                            </div>
+                            <div class="form-group quick-add-container" id="quick-add-container-target-journal"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>文章发表年份范围 *</label>
+                            <div class="input-group">
+                                <input type="number" id="journal-start-year" value="2020">
+                                <span>到</span>
+                                <input type="number" id="journal-end-year" value="{{ current_year }}">
+                            </div>
+                        </div>
+                        <button class="btn-primary" id="search-journal-citations-btn">检索互引</button>
+                    </div>
+
+                    <div id="journal-citations-results-wrapper" style="display: none; margin-top: 2rem;">
+
+                        <!-- Heatmap (existing) -->
+                        <div class="chart-section">
+                            <div class="chart-section-header">
+                                <div class="chart-section-title">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                                    <h3>互引年度分布热力图</h3>
+                                </div>
+                                <div class="chart-section-actions">
+                                    <button class="btn-chart-action" id="export-heatmap-btn" style="display: none;">导出数据</button>
+                                </div>
+                            </div>
+                            <div class="chart-section-body">
+                                <div id="journal-citations-chart" class="chart-container"></div>
+                            </div>
+                        </div>
+
+                        <!-- Journal ranking bar chart (NEW) -->
+                        <div class="chart-section" style="margin-top: 1rem;">
+                            <div class="chart-section-header">
+                                <div class="chart-section-title">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                                    <h3>源期刊引用量排行</h3>
+                                </div>
+                            </div>
+                            <div class="chart-section-body">
+                                <div id="journal-ranking-chart" class="chart-container" style="min-height: 320px;"></div>
+                            </div>
+                        </div>
+
+                        <div id="journal-citations-results-container" style="margin-top: 1.5rem;"></div>
+                    </div>
+                </div>
+
+                <!-- ============================================================
+                     功能 4: 查文章被引
+                ============================================================ -->
+                <div class="tab-pane" id="cited-by-pane">
+
+                    <div id="cited-by-stage-1">
+                        <div class="form-card">
+                            <h2>查找文章</h2>
+                            <p class="form-description">输入文章的标题、DOI或数据库ID，查看其被引详情。</p>
+                            <div class="form-group">
+                                <label for="article-identifier">文章标题、DOI 或 ID *</label>
+                                <input type="text" id="article-identifier" placeholder="例如: 现代外语的教学与研究 或 DOI 地址">
+                            </div>
+                            <button class="btn-primary" id="find-article-btn">查找文章</button>
+                        </div>
+                    </div>
+
+                    <div id="cited-by-stage-2" style="display: none;">
+                        <div class="form-card">
+                            <h2>选择文章</h2>
+                            <p class="form-description">请从以下最匹配的文章中选择一篇，以查看其详情。</p>
+                            <div class="list-controls">
+                                <div class="list-header">
+                                    <h3>候选文章</h3>
+                                    <button class="btn-secondary-small btn-export" data-target="cited-by-article-candidates-container" data-filename-prefix="article_candidates">导出 Excel</button>
+                                </div>
+                            </div>
+                            <div id="cited-by-article-candidates-container" class="content-container"></div>
+                            <button class="btn-secondary" id="back-to-article-search">返回重新搜索</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /.tool-container -->
+        </div><!-- /.tool-card -->
+
+        <footer>
+            <p>Powered by Internal CNKI Database</p>
+            <p class="footer-copyright">《外语教学》编辑部 版权所有</p>
+        </footer>
+    </div><!-- /.page-container -->
+
+    <!-- ── Modals ── -->
+    <div id="article-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close-btn">×</button>
+            <div id="modal-body-content"></div>
+        </div>
+    </div>
+
+    <div id="citing-articles-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close-btn">×</button>
+            <div class="list-header">
+                <h2 id="citing-modal-title">引用文献列表</h2>
+                <button class="btn-secondary-small btn-export" data-target="citing-articles-list" data-filename-prefix="citing_articles">导出 Excel</button>
+            </div>
+            <div id="citing-articles-list" class="modal-body-content"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js" defer></script>
+    <script src="{{ url_for('static', filename='script.js', v=asset_version) }}" defer></script>
+</body>
+</html>

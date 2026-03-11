@@ -1,0 +1,59 @@
+<!-- START OF FILE register.html (LOCAL DATABASE ONLY) -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 引力域 (Citation Field)</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="auth-page-wrapper">
+        <div class="auth-visual">
+            <div class="auth-visual-content">
+                <h2>引力域 <span class="brand-subtitle-light">Citation Field</span></h2>
+                <p>基于内部文献数据库，洞察学术引力，探索知识脉络。</p>
+            </div>
+        </div>
+        <div class="auth-form-container">
+            <div class="auth-card">
+                <h1>创建账户</h1>
+                <p>使用邀请码注册，开启您的分析之旅。</p>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    <ul class=flash-messages>
+                    {% for category, message in messages %}
+                      <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                  {% endif %}
+                {% endwith %}
+
+                <form method="post" action="{{ url_for('register') }}">
+                    <div class="form-group">
+                        <label for="invite_code">邀请码</label>
+                        <input type="text" id="invite_code" name="invite_code" required placeholder="请输入内部测试邀请码">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">邮箱地址</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">设置密码</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">注册并登录</button>
+                </form>
+                <p class="auth-link">
+                    已有账户？ <a href="{{ url_for('login') }}">返回登录</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
